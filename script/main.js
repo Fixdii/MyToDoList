@@ -217,7 +217,7 @@ function changeTheme() {
     darkTheme.remove();
   } else {
     let style = document.createElement("link");
-    style.href = "style.css";
+    style.href = "/style/style.css";
     style.id = "darkTheme";
     style.rel = "stylesheet";
     head.append(style);
