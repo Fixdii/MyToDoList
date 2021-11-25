@@ -1,0 +1,21 @@
+body{
+    background-color: #212529;
+}
+
+.bg-light {
+    background-color: #000000c2!important;
+    color: #f8f9fa;
+}
+
+.btn-primary{
+    background-color: #212529;
+}
+
+.list-group-item{
+    background-color: #ffffffb3;
+}
+
+.tasks,
+.completTasks{
+    color: #f8f9fa;
+}
