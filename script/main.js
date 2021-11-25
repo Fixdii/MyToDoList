@@ -18,7 +18,7 @@ let editDate = null;
 
 const TASKS = [];
 
-function add({ inputTitle, inputText, gridRadios, date, complete }) {
+function add({ inputTitle, inputText, gridRadios, date, complete,color}) {
   let li = document.createElement("li");
   li.className = "list-group-item d-flex w-100 mb-2";
   let dropdown = document.createElement("div");
@@ -76,9 +76,10 @@ function add({ inputTitle, inputText, gridRadios, date, complete }) {
 
   if (complete) {
     li.style.backgroundColor = "rgba(40,167,69,0.8)";
-    completedTasks.append(li);
+    completedTasks.prepend(li);
   } else {
-    currentTasks.append(li);
+    li.style.backgroundColor = color;
+    currentTasks.prepend(li);
   }
 
   btnComplete.addEventListener("click", (event) => {
@@ -127,11 +128,12 @@ function completeTask(timestamp, target) {
   counterTask();
 }
 
-function edit({ inputTitle, inputText, gridRadios, date }, target, editDate) {
+function edit({ inputTitle, inputText, gridRadios, color }, target, editDate) {
   let title = target.querySelector("h5");
   let text = target.querySelector("p");
   let priority = target.querySelector("small");
 
+  target.style.backgroundColor = color;
   title.textContent = inputTitle;
   text.textContent = inputText;
   priority.textContent = gridRadios + " priority";
@@ -141,6 +143,7 @@ function edit({ inputTitle, inputText, gridRadios, date }, target, editDate) {
       TASKS[key].inputTitle = inputTitle;
       TASKS[key].inputText = inputText;
       TASKS[key].gridRadios = gridRadios;
+      TASKS[key].color = color;
     }
   }
 
