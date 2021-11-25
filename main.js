@@ -34,6 +34,7 @@ addTask.addEventListener("submit", (e) => {
 
   addTask.reset();
   setTask.saved();
+  setTask.counterTask();
 
   $("#exampleModal").modal("hide");
 });
@@ -133,8 +134,8 @@ const setTask = {
       }
     }
 
-    this.counterTask();
     this.saved();
+    this.counterTask();
     parent.remove();
   },
   complete(target) {
@@ -156,8 +157,8 @@ const setTask = {
       }
     }
 
-    this.counterTask();
     this.saved();
+    this.counterTask();
   },
   edit({ inputTitle, inputText, gridRadios }, target) {
     let title = target.querySelector("h5");
