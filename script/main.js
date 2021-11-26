@@ -1,26 +1,95 @@
-const currentTasks = document.querySelector("#currentTasks");
-const completedTasks = document.querySelector("#completedTasks");
-const addTask = document.querySelector("#add-task");
-const dropdownMenuItem1 = document.querySelector("#dropdownMenuItem1");
-const inputTitle = document.querySelector("#inputTitle");
-const inputText = document.querySelector("#inputText");
-const exampleModalLabel = document.querySelector("#exampleModalLabel");
-const eddTask = document.querySelector(".add-task");
+const currentTasks = document.getElementById("currentTasks");
+const completedTasks = document.getElementById("completedTasks");
+const modalForm = document.getElementById("add-task");
+const dropdownMenuItem1 = document.getElementById("dropdownMenuItem1");
+const inputTitle = document.getElementById("inputTitle");
+const inputText = document.getElementById("inputText");
+const createTaskButton = document.getElementById('createModal');
 const btnSuccess = document.querySelector(".btn-success");
 const up = document.querySelector(".up");
 const down = document.querySelector(".down");
 const darkTheme = document.querySelector(".darkTheme");
-let head = window.document.getElementsByTagName("head")[0];
+const head = window.document.getElementsByTagName("head")[0];
 
-let isEdit = false;
 let editTarget = null;
 let editDate = null;
 
 const TASKS = [];
 
-function add({ inputTitle, inputText, gridRadios, date, complete,color}) {
+function getColorName(color) {
+  switch (color) {
+    case '#b75757': return 'Red';
+    case '#5d9cec': return 'Blue';
+    case '#b24ecf': return 'Purple';
+    default: return 'Nothing';
+  }
+}
+
+class Modal {
+  static modalTitleElement = document.querySelector("#exampleModalLabel");
+  static sucessButtonElement = document.querySelector(".success-button");
+
+  static openEditModal(date, target) {
+    const parent = target.closest(".list-group-item");
+    
+
+    const timestamp = Number(parent.getAttribute('data-custom-date'));
+    const task = TASKS.find(task => task.date === timestamp);
+
+    const colorName = getColorName(task.color)
+
+    const priorityElement = modalForm.querySelector(`#${task.priorityValue}`);
+    const colorElement = modalForm.querySelector(`#${colorName}`);
+    priorityElement.setAttribute('checked', 'checked');
+    colorElement.setAttribute('checked', 'checked');
+  
+    inputTitle.value = task.inputTitle;
+    inputText.value = task.inputText;
+
+    this.modalTitleElement.textContent = "Edit task";
+    this.sucessButtonElement.textContent = "Edit task";
+  
+    editTarget = parent;
+    editDate = date;
+  }
+
+  static openCreateModal() {
+    this.modalTitleElement.textContent = "Add task";
+    this.sucessButtonElement.textContent = "Add task";
+
+    editTarget = null;
+  }
+
+  static close() {
+    $("#exampleModal").modal("hide");
+  }
+
+  static getFormData() {
+    const formData = Object.fromEntries(new FormData(modalForm).entries());
+    // console.log(formData)
+    let taskDate = this.getNewDate();
+
+    formData.date = taskDate;
+    formData.complete = false;
+
+    return formData;
+  }
+
+  
+  static getNewDate() {
+    let now = new Date();
+    return now.getTime();
+  }
+
+  static setPriority() {
+
+  }
+}
+
+function add({ inputTitle, inputText, priorityValue, date, complete,color}) {
   let li = document.createElement("li");
   li.className = "list-group-item d-flex w-100 mb-2";
+  li.setAttribute('data-custom-date', `${date}`);
   let dropdown = document.createElement("div");
   dropdown.className = "dropdown m-2 dropleft";
   let div = document.createElement("div");
@@ -37,6 +106,10 @@ function add({ inputTitle, inputText, gridRadios, date, complete,color}) {
     btnComplete.append("Complete");
     div.append(btnComplete);
     btnEdit.append("Edit");
+
+    btnEdit.setAttribute('data-toggle', 'modal')
+    btnEdit.setAttribute('data-target', '#exampleModal')
+
     div.append(btnEdit);
   }
 
@@ -48,7 +121,7 @@ function add({ inputTitle, inputText, gridRadios, date, complete,color}) {
             <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">${inputTitle}</h5>
                 <div>
-                    <small class="mr-2">${gridRadios} priority</small>
+                    <small class="mr-2">${priorityValue} priority</small>
                     <small class = "taskDate">${convertDate(date)}</small>
                 </div>
 
@@ -89,7 +162,7 @@ function add({ inputTitle, inputText, gridRadios, date, complete,color}) {
 
   btnEdit.addEventListener("click", (event) => {
     const target = event.target;
-    createEditModal(date, target);
+    Modal.openEditModal(date, target)
   });
 
   btnDelete.addEventListener("click", (event) => {
@@ -128,48 +201,28 @@ function completeTask(timestamp, target) {
   counterTask();
 }
 
-function edit({ inputTitle, inputText, gridRadios, color }, target, editDate) {
+function edit({ inputTitle, inputText, priorityValue, color }, target, editDate) {
   let title = target.querySelector("h5");
   let text = target.querySelector("p");
   let priority = target.querySelector("small");
 
   target.style.backgroundColor = color;
+  target.setAttribute('data-custom-date', `${editDate}`);
+  target.setAttribute('data-custom-priority', `${priorityValue}`);
   title.textContent = inputTitle;
   text.textContent = inputText;
-  priority.textContent = gridRadios + " priority";
+  priority.textContent = priorityValue + " priority";
 
   for (let key in TASKS) {
     if (TASKS[key].date == editDate) {
       TASKS[key].inputTitle = inputTitle;
       TASKS[key].inputText = inputText;
-      TASKS[key].gridRadios = gridRadios;
+      TASKS[key].priorityValue = priorityValue;
       TASKS[key].color = color;
     }
   }
 
-  editTarget = null;
-  editDate = null;
-  isEdit = false;
-
   saved();
-}
-
-function createEditModal(date, target) {
-  let parent = target.closest(".list-group-item");
-  let title = parent.querySelector("h5");
-  let text = parent.querySelector("p");
-
-  inputTitle.value = title.textContent;
-  inputText.value = text.textContent;
-
-  exampleModalLabel.textContent = "Edit task";
-  eddTask.textContent = "Edit task";
-
-  isEdit = true;
-  editTarget = parent;
-  editDate = date;
-
-  $("#exampleModal").modal("show");
 }
 
 function saved() {
@@ -193,11 +246,6 @@ function counterTask() {
 
   complete.textContent = `Comleted (${counter})`;
   noComplete.textContent = `ToDo (${all - counter})`;
-}
-
-function getDate() {
-  let now = +new Date();
-  return now;
 }
 
 function convertDate(timestamp) {
@@ -230,36 +278,34 @@ function changeTheme() {
 function init() {
   let returnObj = JSON.parse(localStorage.getItem("tasks"));
   counterTask();
+
+  createTaskButton.addEventListener("click", () => {
+    Modal.openCreateModal();
+  })
+
   for (let i of returnObj) {
     TASKS.push(i);
     add(i);
   }
 }
 
-addTask.addEventListener("submit", (e) => {
+modalForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const formData = Object.fromEntries(new FormData(e.target).entries());
-  let taskDate = getDate();
+  const formData = Modal.getFormData();
 
-  exampleModalLabel.textContent = "Add task";
-  eddTask.textContent = "Add task";
-
-  formData.date = taskDate;
-  formData.complete = false;
-
-  if (!isEdit) {
+  if (!editTarget) {
     add(formData);
     TASKS.push(formData);
   } else {
     edit(formData, editTarget, editDate);
   }
 
-  addTask.reset();
+  modalForm.reset();
   saved();
   counterTask();
 
-  $("#exampleModal").modal("hide");
+  Modal.close();
 });
 
 up.addEventListener("click", () => {
@@ -278,4 +324,6 @@ darkTheme.addEventListener("click", () => {
   changeTheme();
 });
 
-init();
+window.addEventListener('DOMContentLoaded', () => {
+  init();
+})
