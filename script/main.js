@@ -30,8 +30,10 @@ class Modal {
   static sucessButtonElement = document.querySelector(".success-button");
 
   static openEditModal(date, target) {
+    document.getElementById("add-task").reset();
+
     const parent = target.closest(".list-group-item");
-    
+    const modalForm = document.getElementById("add-task");
 
     const timestamp = Number(parent.getAttribute('data-custom-date'));
     const task = TASKS.find(task => task.date === timestamp);
@@ -54,6 +56,8 @@ class Modal {
   }
 
   static openCreateModal() {
+    document.getElementById("add-task").reset();
+
     this.modalTitleElement.textContent = "Add task";
     this.sucessButtonElement.textContent = "Add task";
 
@@ -66,7 +70,6 @@ class Modal {
 
   static getFormData() {
     const formData = Object.fromEntries(new FormData(modalForm).entries());
-    // console.log(formData)
     let taskDate = this.getNewDate();
 
     formData.date = taskDate;
@@ -79,10 +82,6 @@ class Modal {
   static getNewDate() {
     let now = new Date();
     return now.getTime();
-  }
-
-  static setPriority() {
-
   }
 }
 
@@ -260,18 +259,30 @@ function sortTAsks(i) {
     return new Date(i * a.date) - new Date(i * b.date);
   });
   saved();
+  deleteAndDrawTasks();
+}
+
+function deleteAndDrawTasks() {
+  currentTasks.innerHTML = '';
+  completedTasks.innerHTML = '';
+
+  for (const task of TASKS) {
+    add(task);
+  }
 }
 
 function changeTheme() {
   let darkTheme = document.querySelector("#darkTheme");
   if (darkTheme) {
     darkTheme.remove();
+    localStorage.getItem('darkTheme') && localStorage.removeItem('darkTheme');
   } else {
     let style = document.createElement("link");
     style.href = "style/style.css";
     style.id = "darkTheme";
     style.rel = "stylesheet";
     head.append(style);
+    localStorage.setItem("darkTheme", JSON.stringify(true));
   }
 }
 
@@ -279,13 +290,17 @@ function init() {
   let returnObj = JSON.parse(localStorage.getItem("tasks"));
   counterTask();
 
+  if (localStorage.getItem('darkTheme')) {
+    changeTheme();
+  }
+
   createTaskButton.addEventListener("click", () => {
     Modal.openCreateModal();
   })
 
-  for (let i of returnObj) {
-    TASKS.push(i);
-    add(i);
+  for (let task of returnObj) {
+    TASKS.push(task);
+    add(task);
   }
 }
 
@@ -301,23 +316,17 @@ modalForm.addEventListener("submit", (e) => {
     edit(formData, editTarget, editDate);
   }
 
-  modalForm.reset();
   saved();
   counterTask();
-
   Modal.close();
 });
 
 up.addEventListener("click", () => {
-  let i = -1;
-  sortTAsks(i);
-  location.reload();
+  sortTAsks(-1);
 });
 
 down.addEventListener("click", () => {
-  let i = 1;
-  sortTAsks(i);
-  location.reload();
+  sortTAsks(1);
 });
 
 darkTheme.addEventListener("click", () => {
