@@ -31,19 +31,19 @@ class Modal {
 
   static openEditModal(date, target) {
     document.getElementById("add-task").reset();
-
+   
     const parent = target.closest(".list-group-item");
     const modalForm = document.getElementById("add-task");
 
     const timestamp = Number(parent.getAttribute('data-custom-date'));
     const task = TASKS.find(task => task.date === timestamp);
-
     const colorName = getColorName(task.color)
 
     const priorityElement = modalForm.querySelector(`#${task.priorityValue}`);
     const colorElement = modalForm.querySelector(`#${colorName}`);
-    priorityElement.setAttribute('checked', 'checked');
-    colorElement.setAttribute('checked', 'checked');
+    priorityElement.checked = true;
+    colorElement.checked = true;
+
   
     inputTitle.value = task.inputTitle;
     inputText.value = task.inputText;
@@ -58,6 +58,14 @@ class Modal {
   static openCreateModal() {
     document.getElementById("add-task").reset();
 
+    const radioButton = modalForm.querySelectorAll('.form-check-input');
+ 
+    let radioButtonArr = Array.prototype.slice.call(radioButton);  
+
+    for (let elem of radioButtonArr){
+      elem.checked = false;
+    }
+    
     this.modalTitleElement.textContent = "Add task";
     this.sucessButtonElement.textContent = "Add task";
 
@@ -235,13 +243,14 @@ function counterTask() {
   let returnObj = JSON.parse(localStorage.getItem("tasks"));
   let complete = document.querySelector(".completTasks");
   let noComplete = document.querySelector(".tasks");
-
+  if(returnObj){
   for (let task of returnObj) {
     if (task.complete == true) {
       counter++;
     }
     all++;
   }
+}
 
   complete.textContent = `Comleted (${counter})`;
   noComplete.textContent = `ToDo (${all - counter})`;
